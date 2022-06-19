@@ -8,53 +8,36 @@ The features in the data are described below:
 
 #### General Details
 
-+-----------------------+--------------+---------------------------------------------------------+
-| Column Name           | Type         | Description                                             |
-+=======================+==============+=========================================================+
-| Start Date            | Date         | the date the participant started the survey             |
-+-----------------------+--------------+---------------------------------------------------------+
-| End Date              | Date         | the date the participant started the survey             |
-+-----------------------+--------------+---------------------------------------------------------+
-| IPAddress             | Character    | the IP address the survey was taken from                |
-+-----------------------+--------------+---------------------------------------------------------+
-| Progress              | Numeric      | the percent of the survey that was filled               |
-+-----------------------+--------------+---------------------------------------------------------+
-| Duration (in seconds) | Numeric      | the amount of time (in seconds) filling the survey took |
-+-----------------------+--------------+---------------------------------------------------------+
-| Finished              | Numeric      | if the participant finished filling the survey Yes/No   |
-+-----------------------+--------------+---------------------------------------------------------+
-| Responseid            | character    | the response ID                                         |
-+-----------------------+--------------+---------------------------------------------------------+
-| workerID              | character    | the participant ID                                      |
-+-----------------------+--------------+---------------------------------------------------------+
+
+|Column Name | Type | Description |
+|------------|------|-------------|
+|Start Date  | Date | the date the participant started the survey|
+|End Date  | Date | the date the participant started the survey|
+|IPAddress  | Character | the IP address the survey was taken from|
+|Progress | Numeric| the percent of the survey that was filled|
+|Duration (in seconds)  | Numeric | the amount of time (in seconds) filling the survey took|
+|Finished  | Numeric | if the participant finished filling the survey Yes/No |
+|Responseid | character | the response ID |
+|workerID | character | the participant ID |
 
 #### Emotional Regulation Information
 
 The columns contains the participant rank to a given statement from (1) "Not Very" to (5) "Very"
 
-+----------------------+------------+----------------------------------------------------------------------------+
-| Column Name          | Type       | Description                                                                |
-+======================+============+============================================================================+
-| RRS_1-22             | Numeric    | rumination: tendency to think negatively about past events -- bad strategy |
-+----------------------+------------+----------------------------------------------------------------------------+
-| CES.D_1-20           | Numeric    | depression                                                                 |
-+----------------------+------------+----------------------------------------------------------------------------+
-| ERQ_reappraisal_1-10 | Numeric    | tendency to think differently about negative events -- good strategy       |
-+----------------------+------------+----------------------------------------------------------------------------+
-| IRI_1-28             | Numeric    | empathy, sometimes separated to emotional and cognitive                    |
-+----------------------+------------+----------------------------------------------------------------------------+
-| HAS_1-20             | Numeric    | helping attitudes                                                          |
-+----------------------+------------+----------------------------------------------------------------------------+
-| Rosenberg_SE_1-10    | Numeric    | self esteem                                                                |
-+----------------------+------------+----------------------------------------------------------------------------+
-| BAI_1-21             | Numeric    | anxiety                                                                    |
-+----------------------+------------+----------------------------------------------------------------------------+
-| PSS_1-10             | Numeric    | perceived stress                                                           |
-+----------------------+------------+----------------------------------------------------------------------------+
-| GSE_1-10             | Numeric    | self efficacy                                                              |
-+----------------------+------------+----------------------------------------------------------------------------+
-| SEES_1-20            | Numeric    | self esteem                                                                |
-+----------------------+------------+----------------------------------------------------------------------------+
+|Column Name | Type | Description |
+|------------|------|-------------|
+|RRS_1-22  | Numeric | rumination: tendency to think negatively about past events – bad strategy|
+|CES.D_1-20  | Numeric | depression|
+|ERQ_reappraisal_1-10| Numeric | tendency to think differently about negative events – good strategy|
+|IRI_1-28| Numeric | empathy, sometimes separated to emotional and cognitive|
+|HAS_1-20| Numeric |helping attitudes|
+|Rosenberg_SE_1-10| Numeric |self esteem|
+|BAI_1-21| Numeric |anxiety|
+|PSS_1-10| Numeric |perceived stress|
+|GSE_1-10| Numeric |self efficacy|
+|SEES_1-20| Numeric|self esteem|
+
+
 
 #### Personal Information
 
