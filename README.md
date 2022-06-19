@@ -83,7 +83,7 @@ In order to get our end to end code analysis, run the chunks in the attached rmd
 
 -   Visualize the 3D model
 
--   Creating surface to 3D plot
+-   Create surface to 3D plot
 
 #### 4. Test the Model
 
