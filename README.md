@@ -55,7 +55,7 @@ In order to get our end to end code analysis, run the chunks in the attached rmd
 
 # Data analysis review
 
-#### 1. Loading & Cleaning the Data
+### 1. Loading & Cleaning the Data
 
 -   Load libraries
 -   Upload the data
@@ -65,13 +65,13 @@ In order to get our end to end code analysis, run the chunks in the attached rmd
 -   Merge all the tables into one
 -   Remove outliers
 
-#### 2. Data Analysis
+### 2. Data Analysis
 
 -   Summary Statistic
 -   Initial analysis
 -   Visualizations - Explore relationships between the different variables
 
-#### 3. Model fit
+### 3. Model fit
 
 -   Splitting data to train and test
 
@@ -85,7 +85,7 @@ In order to get our end to end code analysis, run the chunks in the attached rmd
 
 -   Create surface to 3D plot
 
-#### 4. Test the Model
+### 4. Test the Model
 
 -   Predict on the testing data set
 -   RMSE index
