@@ -46,7 +46,7 @@ The columns contains the participant rank to a given statement from (1) "Not Ver
 | SES_Education | Numeric | number oh education years                   |
 | SES_Degree    | Numeric | socioeconomic status                        |
 | Age           | Numeric | the participant age                         |
-| Gender        | Numeric | the participant gender. 0 = Male 1 = Female |
+| Gender        | Numeric | the participant gender. 1 = Male 0 = Female |
 | Ethnicity     | Numeric | the participant ethnicity                   |
 
 For our data analysis we combined data from the 3 given data sets into one table that contains personal characteristics of each participant as well as the sum of RRS and CES.D columns for each period of time.
