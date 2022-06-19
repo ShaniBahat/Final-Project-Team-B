@@ -1,0 +1,337 @@
+---
+title: "Final Project"
+author: "Team B - Yuval Sabag, Shani Bahat"
+date: "13 6 2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+**In order to get our  end to end code analysis, run the chunks by the given order **
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+##### Loading libraries
+```{r load-packages, message = FALSE , include=FALSE}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(readxl)
+library(parsnip)
+library(plotly)
+library(rsample)
+library(yardstick)
+```
+
+# 1.Loading & Cleaning the Data 
+
+##### Please upload your data here
+```{r}
+followup_path <- "C:/Users/yuval/OneDrive/Desktop/F_project/data/MTurk Social Regulation Training - Followup Questionnaires_May 3, 2022_03.08.xlsx"
+
+post_path <- "C:/Users/yuval/OneDrive/Desktop/F_project/data/MTurk Social Regulation Training - PostTraining Questionnaires_October 31, 2018_02.20.xlsx"
+  
+pre_provider_path <-"C:/Users/yuval/OneDrive/Desktop/F_project/data/MTurk Social Regulation Training - PreTraining Questionnaires Provider_October 31, 2018_02.14.xlsx"
+  
+pre_self_path <- "C:/Users/yuval/OneDrive/Desktop/F_project/data/MTurk Social Regulation Training - PreTraining Questionnaires Self_October 31, 2018_02.08.xlsx"
+
+```
+
+
+```{r, include=FALSE}
+
+Follow_UP  <- read_excel(followup_path)
+
+Post <- read_excel(post_path)
+
+Pre_prov <- read_excel(pre_provider_path)
+
+Pre_self <- read_excel(pre_self_path, sheet = "Sheet1")
+
+```
+
+
+##### Rename columns and delete unrelated lines
+```{r}
+Follow_UP <- Follow_UP[3:49, ]
+
+names(Follow_UP)[19:40]<- paste0(rep("", each=22), "RRS_",1:22)
+
+names(Follow_UP)[41:60]<- paste0(rep("", each=20), "CES.D_",1:20)
+```
+
+
+##### Handling relevant columns - FollowUP data
+```{r}
+
+Follow_UP <- select(Follow_UP, WorkerID, contains("CES.D_"),contains("RRS_"), Gender, SES_Degree)%>% mutate_at(c(2:45), as.numeric) %>% rowwise()%>% mutate(FollowUP_CES.D_sum = sum(c_across(contains("CES.D_"))), FollowUP_RRS_sum = sum(c_across(contains("RRS_"))) ) 
+
+
+Follow_UP <- select(Follow_UP, WorkerID, FollowUP_RRS_sum, FollowUP_CES.D_sum, Gender, SES_Degree)
+
+Follow_UP <- na.omit(Follow_UP)
+
+```
+
+
+##### Handling relevant columns - Post data
+```{r}
+Post <- select(Post, WorkerID, PostTraining_RRS_sum,contains("CES.D_"))%>% rowwise()%>% mutate(PostTraining_CES.D_sum =sum(c_across(contains("CES.D_"))))
+
+Post <- select(Post, WorkerID, PostTraining_RRS_sum, PostTraining_CES.D_sum) 
+
+Post <- na.omit(Post)
+
+```
+
+
+##### Handling relevant columns - Pre provider data
+```{r}
+Pre_prov <- select(Pre_prov, WorkerID,group, RRS_sum,contains("CES.D_"))%>% rowwise()%>% mutate(Pre_CES.D_sum =sum(c_across(contains("CES.D_"))),Pre_RRS_sum = RRS_sum )
+
+Pre_prov <- select(Pre_prov, WorkerID, group, Pre_RRS_sum, Pre_CES.D_sum) 
+
+Pre_prov <- na.omit(Pre_prov)
+
+```
+
+##### Handling relevant columns - Pre self data
+```{r}
+Pre_self <- select(Pre_self, WorkerID, group, RRS_sum,contains("CES.D_"))%>% rowwise()%>% mutate(Pre_CES.D_sum =sum(c_across(contains("CES.D_"))),Pre_RRS_sum = RRS_sum )
+
+Pre_self <- select(Pre_self, WorkerID, group, Pre_RRS_sum, Pre_CES.D_sum) 
+
+Pre_self  <- na.omit(Pre_self)
+```
+
+##### Merge two tables (Pre provider, Pre self ) into one - Pre
+```{r}
+Pre <- full_join(Pre_self, Pre_prov, by = c("WorkerID", "group", "Pre_RRS_sum", "Pre_CES.D_sum"))
+
+```
+
+##### Merge all the tables into one table - Data
+```{r}
+#Dropping duplicate. 
+#Change of variables of Gender: 0 - for men and 1 - for women .
+#Change data type of Gender into factor .
+
+Data <- inner_join(inner_join(Pre, Post, by = c ("WorkerID")), Follow_UP, by = c ("WorkerID")) 
+
+Data <- Data %>% distinct(WorkerID, .keep_all = TRUE)
+
+
+Data$Gender[Data$Gender== "0"] <- "Male"
+
+Data$Gender[Data$Gender== "1"] <- "Female"
+
+Data <- Data %>%  mutate(Gender = factor(Gender))
+
+```
+
+
+
+##### Remove outliers
+```{r}
+outliers1 <- boxplot(Data$FollowUP_CES.D_sum, plot = FALSE)$out
+
+outliers2 <- boxplot(Data$PostTraining_CES.D_sum, plot = FALSE)$out
+
+outliers3 <- boxplot(Data$Pre_CES.D_sum, plot = FALSE)$out
+```
+
+
+```{r}
+Data <- Data[-which (Data$FollowUP_CES.D_sum %in% outliers1), ]
+
+Data <- Data[-which (Data$PostTraining_CES.D_sum %in% outliers2), ]
+
+Data <- Data[-which (Data$Pre_CES.D_sum %in% outliers3), ]
+```
+
+
+
+##### Handling relevant columns
+```{r}
+Data <- select(Data, WorkerID, group, Gender, SES_Degree, Pre_RRS_sum, Pre_CES.D_sum, PostTraining_RRS_sum, PostTraining_CES.D_sum, FollowUP_RRS_sum, FollowUP_CES.D_sum)
+
+glimpse(Data)
+```
+
+
+
+# 2.Data Analysis 
+
+##### Summary Statistic
+```{r}
+rrs <- Data %>% pivot_longer(!c(WorkerID,SES_Degree,group,Gender,Pre_CES.D_sum,PostTraining_CES.D_sum,FollowUP_CES.D_sum), names_to = "Period", values_to = "RRS")%>% select(WorkerID, Gender, Period, RRS)  
+
+
+rrs$Period[rrs$Period == c("Pre_RRS_sum", "PostTraining_RRS_sum", "FollowUP_RRS_sum")] <- c("Pre", "Post", "Follow_UP")
+
+```
+
+
+```{r}
+ces.d <- Data %>%  pivot_longer(!c(WorkerID,SES_Degree,group,Gender,Pre_RRS_sum,PostTraining_RRS_sum,FollowUP_RRS_sum), names_to = "Period", values_to = "CES.D") %>% select(WorkerID, Gender, Period, CES.D)
+
+ces.d$Period[ces.d$Period == c("Pre_CES.D_sum", "PostTraining_CES.D_sum", "FollowUP_CES.D_sum")] <- c("Pre", "Post", "Follow_UP")
+
+```
+
+
+```{r}
+stat <- inner_join(rrs, ces.d, by = c("WorkerID", "Gender", "Period"))
+
+stat
+```
+
+
+
+###### RRS and CES.D rates scattering By period of time
+```{r, fig.width=6, fig.height=2.75}
+
+ggplot(stat, aes(x = RRS, y = CES.D, color = Period))+
+  labs(x = "RRS rate ", y = "CES.D rate", title = "RRS and CES.D rates scattering", subtitle = "By period of time")+
+  facet_grid(~factor(Period, levels = c("Pre", "Post", "Follow_UP")))+
+  geom_point()+
+  theme_bw()+
+   theme(legend.position = "bottom")+
+  scale_color_manual(labels = c("2 Months Followup", "Post", "Pre"), values = c("darkslategrey", "darkslategray4", "darkslategray3"))
+```
+
+
+###### CES.D RATE By period of time & RRS RATE By period of time
+```{r, figures-side, fig.show="hold", out.width="50%"}
+#CES.D
+ggplot(stat, aes(x=Period, y=CES.D, fill= Period))+
+  labs(y = "CES.D rate", title = "CES.D RATE", subtitle = "By period of time")+
+  geom_boxplot(varwidth = TRUE)+
+  scale_x_discrete(limits = rev)+
+  theme_bw()+
+  theme(legend.position = "bottom")+
+   scale_fill_manual(labels = c("2 Months Followup", "Post", "Pre"), values = c("darkslategrey", "darkslategray4", "darkslategray3"))
+
+
+#RRS 
+ggplot(stat, aes(x=Period, y=RRS, fill= Period))+
+  labs(y = "RRS rate", title = "RRS RATE", subtitle = "By period of time")+
+  geom_boxplot(varwidth = TRUE)+
+  scale_x_discrete(limits = rev)+
+  theme_bw()+
+  theme(legend.position = "bottom")+
+  scale_fill_manual(labels = c("2 Months Followup", "Post", "Pre"), values = c("darkslategrey", "darkslategray4", "darkslategray3"))
+  
+```
+
+
+##### Summary Statistics
+
+```{r}
+summary(stat)
+```
+
+
+```{r}
+stat %>% group_by(Period) %>% summarise(mean_RRS = mean(RRS), mean_CES.D = mean(CES.D))
+```
+
+
+
+#### 3.Model fit
+
+##### Splitting data to train and test ans set seed
+```{r}
+set.seed(24)
+
+#Put 90% of the data into the training set
+data_split <- initial_split(Data, prop = 0.90)
+
+#Create data frames for the two sets
+train_data <- training(data_split)
+test_data <- testing(data_split)
+```
+
+##### Peek at the split
+```{r}
+glimpse(train_data)
+```
+
+```{r}
+glimpse(test_data)
+```
+
+
+
+##### Build linear regression
+```{r}
+fit <- lm(FollowUP_RRS_sum ~ Pre_RRS_sum + Pre_CES.D_sum + Gender, data = train_data)
+
+summary(fit)
+```
+
+
+##### Creating surface to 3D plot
+```{r}
+x <- seq(1, 100, by = 2)
+y <- seq(1, 100, by = 2)
+
+plane <- outer(x, y, function(a,b){9.0327 +  0.6293*a + 0.3277 *b})
+
+male <- outer(x, y, function(a,b){9.0327 +  0.6293*a + 0.3277 *b -3.3736}) 
+```
+
+
+##### Fit a model to the traning dataset 
+```{r}
+data_fit <- linear_reg() %>%
+  set_engine('lm') %>%
+  fit(FollowUP_RRS_sum ~ Pre_RRS_sum + Pre_CES.D_sum + Gender, data = train_data)
+
+glance(data_fit)$adj.r.squared
+```
+
+
+Can be seen only in R and not in html/PDF
+
+```{r message=FALSE, warning=FALSE, error=FALSE}
+
+p <- plot_ly(train_data, x = ~Pre_RRS_sum, y = ~Pre_CES.D_sum, z = ~FollowUP_RRS_sum, color = ~Gender,colors = c("darkslategrey", "darkslategray3"),
+marker = list(size = 3, alpha = 0.5,line = list(color = "white" ,width = 0.3))) %>% add_markers() %>% 
+add_surface(x= ~x, y= ~y, z= ~plane, type = "surface", colorscale = list(c(0, 1), c("rgb(174, 235, 235)", "rgb(174, 235, 235)")), opacity = 0.7, showscale = FALSE, hovertemplate = paste0('Pre_RRS: %{x}<br>', "Pre_CES.D: %{y}<br>", "Pred_RRS: %{z}<br>" )) %>% 
+add_surface(x= ~x, y= ~y, z= ~male, type = "surface",name = "Male",colorscale = list(c(0, 1), c("rgb(72, 87, 87)", "rgb(72, 87, 87)")), opacity = 0.5, showscale = FALSE, hovertemplate = paste0('Pre_RRS: %{x}<br>', "Pre_CES.D: %{y}<br>", "Pred_RRS: %{z}<br>"))
+
+frameWidget(p)
+
+
+```
+
+
+# 4.Test the Model
+
+##### Predict on the testing dataset
+```{r}
+test_pred <- predict(data_fit, test_data) %>% bind_cols(test_data %>% select(FollowUP_RRS_sum, Pre_RRS_sum, Pre_CES.D_sum, Gender))
+
+test_pred
+```
+
+
+##### RMSE index
+```{r}
+rmse(test_pred, truth = FollowUP_RRS_sum, estimate = .pred)
+```
+
+##### R- squared index
+```{r}
+rsq(test_pred, truth = FollowUP_RRS_sum, estimate = .pred)
+```
+
+
+
+
+
