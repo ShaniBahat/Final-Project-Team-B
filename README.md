@@ -2,7 +2,7 @@
 
 #### Team B - Yuval Sabag, Shani Bahat
 
-This Markdown file describes the data folder structure and organization. Our data is based on Dr. Noga Cohen research -- "Psychological experiment about social emotion regulation". The four attached tables contain data from an online survey that the participants filled on three different time periods of the trial. Each online survey was identical therefore all tables have identical columns.
+This Markdown file describes the data folder structure and organization. Our data is based on Dr. Noga Cohen research - "Psychological experiment about social emotion regulation". The four attached tables contain data from an online survey that the participants filled on three different time periods of the trial. Each online survey was identical therefore all tables have identical columns.
 
 The features in the data are described below:
 
