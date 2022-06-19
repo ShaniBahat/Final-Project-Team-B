@@ -25,6 +25,7 @@ library(parsnip)
 library(plotly)
 library(rsample)
 library(yardstick)
+library(widgetframe)
 ```
 
 # 1.Loading & Cleaning the Data 
@@ -298,7 +299,7 @@ glance(data_fit)$adj.r.squared
 
 Can be seen only in R and not in html/PDF
 
-```{r message=FALSE, warning=FALSE, error=FALSE}
+```{r , warning=FALSE}
 
 p <- plot_ly(train_data, x = ~Pre_RRS_sum, y = ~Pre_CES.D_sum, z = ~FollowUP_RRS_sum, color = ~Gender,colors = c("darkslategrey", "darkslategray3"),
 marker = list(size = 3, alpha = 0.5,line = list(color = "white" ,width = 0.3))) %>% add_markers() %>% 
